@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Sliders, MessageSquare, Menu, X, Sparkles } from 'lucide-react';
 import { StoreConfig } from '../types';
 import { getNeonColorClasses, generateWhatsAppUrl } from '../utils';
+import MBDigitalLogo from './MBDigitalLogo';
 
 interface NavbarProps {
   config: StoreConfig;
@@ -40,10 +41,8 @@ export default function Navbar({ config, onOpenAdmin }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
         {/* Brand Logo */}
         <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <div className={`p-2.5 rounded-xl ${colorStuff.bg} border ${colorStuff.border} ${colorStuff.glow} flex items-center justify-center`}>
-            <Sparkles className={`h-5 w-5 ${colorStuff.text}`} />
-          </div>
-          <span className="font-display font-extrabold text-xl tracking-wider text-white">
+          <MBDigitalLogo className="h-10 w-10 sm:h-11 sm:w-11" showGlow={true} />
+          <span className="font-display font-extrabold text-lg sm:text-xl tracking-wider text-white">
             {config.storeName}
           </span>
         </div>

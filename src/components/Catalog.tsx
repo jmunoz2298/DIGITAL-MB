@@ -99,23 +99,38 @@ export default function Catalog({ products, config, onTrackView }: CatalogProps)
                 className={`flex flex-col rounded-2xl border border-gray-900 interactive-glass hover:bg-gray-900/20 hover:border-gray-800 transition-all duration-300 relative overflow-hidden group ${colorStuff.glowHover}`}
               >
                 {/* Visual Header Grid Gradient */}
-                <div className={`h-40 relative flex items-center justify-center bg-gradient-to-br ${getCategoryGradient(product.id)} overflow-hidden`}>
-                  {/* Grid background on image */}
-                  <div className="absolute inset-0 cyber-grid opacity-25" />
-                  
-                  {/* Futuristic glass blur circle */}
-                  <div className={`absolute w-16 h-16 rounded-full ${colorStuff.bg} border ${colorStuff.border} flex items-center justify-center shadow-lg backdrop-blur-md group-hover:scale-110 transition-transform duration-300`}>
-                    {renderProductIcon(product.category)}
-                  </div>
+                <div className="h-40 relative flex items-center justify-center bg-gray-950 overflow-hidden">
+                  {product.imageUrl ? (
+                    <>
+                      <img 
+                        src={product.imageUrl} 
+                        alt={product.name} 
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-gray-950/90 via-transparent to-black/20" />
+                    </>
+                  ) : (
+                    <>
+                      <div className={`absolute inset-0 bg-gradient-to-br ${getCategoryGradient(product.id)}`} />
+                      {/* Grid background on image */}
+                      <div className="absolute inset-0 cyber-grid opacity-25" />
+                      
+                      {/* Futuristic glass blur circle */}
+                      <div className={`absolute w-16 h-16 rounded-full ${colorStuff.bg} border ${colorStuff.border} flex items-center justify-center shadow-lg backdrop-blur-md group-hover:scale-110 transition-transform duration-300`}>
+                        {renderProductIcon(product.category)}
+                      </div>
+                    </>
+                  )}
                   
                   {/* Category Pill Tag */}
-                  <span className="absolute top-4 left-4 inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-semibold bg-gray-950/80 text-gray-300 border border-gray-800">
+                  <span className="absolute top-4 left-4 inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[10px] font-semibold bg-gray-950/80 text-gray-300 border border-gray-800 backdrop-blur-sm">
                     <Tag className="h-3 w-3 text-gray-400" />
                     <span>{product.category}</span>
                   </span>
 
                   {/* Guaranteed Badge */}
-                  <span className="absolute top-4 right-4 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold bg-green-500/10 text-green-400 border border-green-500/20">
+                  <span className="absolute top-4 right-4 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold bg-green-500/10 text-green-400 border border-green-500/20 backdrop-blur-sm">
                     <ShieldCheck className="h-3 w-3" />
                     <span>ACTIVO 24/7</span>
                   </span>

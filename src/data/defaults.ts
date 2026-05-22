@@ -1,7 +1,7 @@
 import { StoreConfig, Product, Service } from '../types';
 
 export const DEFAULT_CONFIG: StoreConfig = {
-  storeName: "DIGITAL MB",
+  storeName: "Tienda MB DIGITAL",
   tagline: "Potencia tu mundo digital",
   whatsappNumber: "3143497151",
   neonColor: "cyan",

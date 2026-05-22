@@ -19,8 +19,8 @@ export default function App() {
     const saved = localStorage.getItem('nexus_store_config');
     if (saved) {
       const parsed = JSON.parse(saved) as StoreConfig;
-      if (parsed.storeName === 'TIENDA MB' || parsed.storeName === 'NEXUS KOZ') {
-        parsed.storeName = 'DIGITAL MB';
+      if (parsed.storeName === 'TIENDA MB' || parsed.storeName === 'NEXUS KOZ' || parsed.storeName === 'DIGITAL MB') {
+        parsed.storeName = 'Tienda MB DIGITAL';
       }
       return parsed;
     }
@@ -46,14 +46,14 @@ export default function App() {
     const unsubConfig = onSnapshot(configDocRef, async (snapshot) => {
       if (snapshot.exists()) {
         const data = snapshot.data() as StoreConfig;
-        if (data.storeName === 'TIENDA MB' || data.storeName === 'NEXUS KOZ') {
-          const updated = { ...data, storeName: 'DIGITAL MB' };
+        if (data.storeName === 'TIENDA MB' || data.storeName === 'NEXUS KOZ' || data.storeName === 'DIGITAL MB') {
+          const updated = { ...data, storeName: 'Tienda MB DIGITAL' };
           setConfig(updated);
           try {
             await setDoc(configDocRef, updated);
             localStorage.setItem('nexus_store_config', JSON.stringify(updated));
           } catch (e) {
-            console.warn("Failed to update storeName to DIGITAL MB in Firestore: ", e);
+            console.warn("Failed to update storeName to Tienda MB DIGITAL in Firestore: ", e);
           }
         } else {
           setConfig(data);

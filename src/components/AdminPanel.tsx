@@ -211,40 +211,89 @@ export default function AdminPanel({
     }
   };
 
-  // Upload bytes procedure targeting Firebase Storage with progress tracking
+  // Helper to compress image files to high-performance base64 strings so they can be securely saved directly in products
+  const compressImageToBase64 = (file: File, maxWidth = 550, maxHeight = 550, quality = 0.75): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      
+      reader.onload = (event) => {
+        const img = new Image();
+        
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            resolve(event.target?.result as string);
+            return;
+          }
+
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL('image/jpeg', quality);
+          resolve(dataUrl);
+        };
+        
+        img.onerror = (err) => {
+          console.error("Image loading failed:", err);
+          reject(err);
+        };
+        
+        img.src = event.target?.result as string;
+      };
+      
+      reader.onerror = (err) => {
+        console.error("FileReader failed:", err);
+        reject(err);
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Upload bytes procedure targeting Firebase Storage with automatic direct high-compression base64 flow
   const uploadFileToStorage = async (file: File) => {
     if (!file) return;
     setIsUploading(true);
     setUploadPercent(10); // Beginning track marker
 
     try {
-      const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
-      const storageRef = ref(storage, `products/${fileName}`);
-      
-      // Upload bytes
+      // Bypassing remote storage uploads which are prone to connection timeouts or lack of provisioning
       setUploadPercent(40);
-      const snapshot = await uploadBytes(storageRef, file);
-      
+      const base64Url = await compressImageToBase64(file);
       setUploadPercent(80);
-      const downloadUrl = await getDownloadURL(snapshot.ref);
-      
-      setUploadPercent(100);
       
       // Update form context
       if (editingProduct) {
-        setEditingProduct({ ...editingProduct, imageUrl: downloadUrl });
+        setEditingProduct({ ...editingProduct, imageUrl: base64Url });
       } else {
-        setNewProductImg(downloadUrl);
+        setNewProductImg(base64Url);
       }
+      setUploadPercent(100);
       setTimeout(() => {
         setIsUploading(false);
         setUploadPercent(0);
-      }, 700);
+      }, 500);
     } catch (error) {
-      console.warn("Storage upload failed or missing permissions rules. Using robust local fallback image gradient preset.", error);
+      console.error("Direct base64 compressor failed:", error);
+      alert("No se pudo cargar la imagen. Valida que el archivo no esté corrupto.");
       setIsUploading(false);
       setUploadPercent(0);
-      alert("No se pudo completar la carga en Firebase Storage (Verifica reglas de lectura/escritura). El catálogo continuará usando su fallback estético dinámico de colores degradados.");
     }
   };
 
@@ -932,6 +981,26 @@ export default function AdminPanel({
                         placeholder="Alternativo: URL directa de imagen (por ejemplo, https://...)"
                         className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs mt-3 font-mono"
                       />
+
+                      {/* Display thumbnail preview for edit flow */}
+                      {editingProduct.imageUrl && (
+                        <div className="mt-3 relative w-full h-28 rounded-xl overflow-hidden border border-gray-900 bg-gray-950 flex items-center justify-center">
+                          <img 
+                            src={editingProduct.imageUrl} 
+                            alt="Vista previa" 
+                            className="w-full h-full object-contain"
+                            referrerPolicy="no-referrer"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setEditingProduct({ ...editingProduct, imageUrl: '' })}
+                            className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-gray-400 hover:text-white hover:bg-black transition-all cursor-pointer"
+                            title="Eliminar imagen"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
 
                     <button
@@ -1014,7 +1083,7 @@ export default function AdminPanel({
 
                     {/* Image drag uploader context for create flow */}
                     <div>
-                      <label className="block text-[10px] font-mono font-bold text-gray-400 mb-1.5">Subir Imagen vía Firebase Storage</label>
+                      <label className="block text-[10px] font-mono font-bold text-gray-400 mb-1.5">Subir Imagen del Producto (Arrastrar, clic o URL)</label>
                       <div 
                         onDragEnter={handleDrag}
                         onDragOver={handleDrag}
@@ -1027,6 +1096,13 @@ export default function AdminPanel({
                             : 'border-gray-900 bg-gray-950/20 hover:border-gray-800'
                         }`}
                       >
+                        <input 
+                          ref={fileInputRef}
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleFileInputChange}
+                          className="hidden" 
+                        />
                         {isUploading ? (
                           <div className="space-y-1.5">
                             <Upload className="mx-auto h-5 w-5 text-cyan-400 animate-bounce" />
@@ -1040,11 +1116,34 @@ export default function AdminPanel({
                           </div>
                         )}
                       </div>
-                      {/* Optional display of populated ImageUrl link */}
+                      
+                      {/* Manual Image URL input for Create form to match Edit form */}
+                      <input
+                        type="text"
+                        value={newProductImg || ''}
+                        onChange={(e) => setNewProductImg(e.target.value)}
+                        placeholder="Alternativo: URL directa de imagen (por ejemplo, https://...)"
+                        className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs mt-3 font-mono placeholder-gray-800"
+                      />
+
+                      {/* Display thumbnail preview for create flow */}
                       {newProductImg && (
-                        <p className="text-[10px] font-mono text-green-400 mt-2 truncate bg-black/20 p-2 rounded-lg">
-                          CARGADO: {newProductImg}
-                        </p>
+                        <div className="mt-3 relative w-full h-28 rounded-xl overflow-hidden border border-gray-900 bg-gray-950 flex items-center justify-center">
+                          <img 
+                            src={newProductImg} 
+                            alt="Vista previa" 
+                            className="w-full h-full object-contain"
+                            referrerPolicy="no-referrer"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setNewProductImg('')}
+                            className="absolute top-2 right-2 p-1.5 rounded-full bg-black/70 text-gray-400 hover:text-white hover:bg-black transition-all cursor-pointer"
+                            title="Eliminar imagen"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
                       )}
                     </div>
 

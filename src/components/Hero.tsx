@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, ArrowDown } from 'lucide-react';
+import { ArrowRight, ArrowDown } from 'lucide-react';
 import { StoreConfig } from '../types';
 import { getNeonColorClasses } from '../utils';
+import MBDigitalLogo from './MBDigitalLogo';
 
 interface HeroProps {
   config: StoreConfig;
@@ -57,9 +58,23 @@ export default function Hero({ config }: HeroProps) {
           transition={{ duration: 0.8 }}
           className="flex flex-col items-center justify-center space-y-8"
         >
+          {/* Prominent Official MB DIGITAL Logo Display */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: [0.95, 1, 0.95], opacity: 1 }}
+            transition={{ 
+              scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 1 }
+            }}
+            className="relative"
+          >
+            <div className="absolute inset-x-0 bottom-0 top-0 m-auto w-32 h-32 rounded-full bg-emerald-500/15 blur-[60px] pointer-events-none" />
+            <MBDigitalLogo className="h-32 w-32 sm:h-40 sm:w-40 relative z-10 filter drop-shadow-[0_0_15px_rgba(19,240,100,0.3)] hover:scale-105 transition-transform duration-500" showGlow={true} />
+          </motion.div>
+
           {/* Futuristic pill badge */}
           <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-gray-800 bg-gray-950/60 backdrop-blur-md">
-            <Sparkles className={`h-4 w-4 ${colorStuff.text} animate-pulse`} />
+            <MBDigitalLogo className="h-4.5 w-4.5 animate-pulse" showGlow={false} />
             <span className="text-xs font-mono font-semibold tracking-widest text-gray-400 uppercase">
               Tecnología de Vanguardia
             </span>

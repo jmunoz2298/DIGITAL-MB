@@ -1,7 +1,8 @@
 import React from 'react';
-import { Sparkles, Instagram, Linkedin, MessageSquare, ShieldCheck, Mail, ArrowUp } from 'lucide-react';
+import { Instagram, Linkedin, MessageSquare, ShieldCheck, Mail, ArrowUp } from 'lucide-react';
 import { StoreConfig } from '../types';
 import { getNeonColorClasses } from '../utils';
+import MBDigitalLogo from './MBDigitalLogo';
 
 interface FooterProps {
   config: StoreConfig;
@@ -24,9 +25,7 @@ export default function Footer({ config }: FooterProps) {
           {/* Brand Col */}
           <div className="md:col-span-5 flex flex-col space-y-6">
             <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <div className={`p-2.5 rounded-xl ${colorStuff.bg} border ${colorStuff.border} ${colorStuff.glow} flex items-center justify-center`}>
-                <Sparkles className={`h-5 w-5 ${colorStuff.text}`} />
-              </div>
+              <MBDigitalLogo className="h-10 w-10" showGlow={true} />
               <span className="font-display font-extrabold text-xl tracking-wider text-white">
                 {config.storeName}
               </span>
