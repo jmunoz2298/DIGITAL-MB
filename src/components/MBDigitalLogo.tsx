@@ -4,13 +4,34 @@ interface MBDigitalLogoProps {
   className?: string;
   showGlow?: boolean;
   neonColorHex?: string;
+  customLogoUrl?: string;
 }
 
 export default function MBDigitalLogo({ 
   className = "h-12 w-12", 
   showGlow = true,
-  neonColorHex = "#13f064" // Vibrant high-tech neon green from official logo
+  neonColorHex = "#13f064", // Vibrant high-tech neon green from official logo
+  customLogoUrl
 }: MBDigitalLogoProps) {
+  if (customLogoUrl) {
+    return (
+      <div className={`${className} relative flex items-center justify-center`} style={{ contentVisibility: 'auto' }}>
+        {showGlow && (
+          <div 
+            className="absolute inset-0 rounded-full blur-[14px] opacity-25 pointer-events-none" 
+            style={{ backgroundColor: neonColorHex }}
+          />
+        )}
+        <img 
+          src={customLogoUrl} 
+          alt="Branded Logo" 
+          className="relative z-10 w-full h-full object-contain max-h-full max-w-full" 
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
+
   return (
     <svg 
       viewBox="0 0 500 500" 

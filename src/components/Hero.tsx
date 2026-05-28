@@ -39,15 +39,14 @@ export default function Hero({ config }: HeroProps) {
 
       {/* Decorative Blur Spheres */}
       <div 
-        className="absolute top-1/4 left-1/4 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] rounded-full glow-overlay opacity-30 z-0 bg-cyan-500/20"
-        style={{ filter: 'blur(100px)' }}
+        className="absolute top-1/4 left-1/4 w-[280px] sm:w-[500px] h-[280px] sm:h-[500px] rounded-full glow-overlay opacity-15 z-0"
+        style={{ backgroundColor: colorStuff.accentHex, filter: 'blur(100px)' }}
       />
       <div 
-        className="absolute bottom-1/4 right-1/4 w-[250px] sm:w-[450px] h-[250px] sm:h-[450px] rounded-full glow-overlay opacity-25 z-0"
+        className="absolute bottom-1/4 right-1/4 w-[250px] sm:w-[450px] h-[250px] sm:h-[450px] rounded-full glow-overlay opacity-10 z-0"
         style={{ 
           backgroundColor: colorStuff.accentHex, 
           filter: 'blur(110px)',
-          opacity: 0.15
         }}
       />
 
@@ -68,13 +67,20 @@ export default function Hero({ config }: HeroProps) {
             }}
             className="relative"
           >
-            <div className="absolute inset-x-0 bottom-0 top-0 m-auto w-32 h-32 rounded-full bg-emerald-500/15 blur-[60px] pointer-events-none" />
-            <MBDigitalLogo className="h-32 w-32 sm:h-40 sm:w-40 relative z-10 filter drop-shadow-[0_0_15px_rgba(19,240,100,0.3)] hover:scale-105 transition-transform duration-500" showGlow={true} />
+            <div 
+              className="absolute inset-x-0 bottom-0 top-0 m-auto w-32 h-32 rounded-full blur-[60px] pointer-events-none opacity-20" 
+              style={{ backgroundColor: colorStuff.accentHex }}
+            />
+            <MBDigitalLogo 
+              className="h-32 w-32 sm:h-40 sm:w-40 relative z-10 hover:scale-105 transition-transform duration-500" 
+              showGlow={true} 
+              neonColorHex={colorStuff.accentHex}
+              customLogoUrl={config.heroLogoUrl || config.logoUrl}
+            />
           </motion.div>
-
           {/* Futuristic pill badge */}
-          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-gray-800 bg-gray-950/60 backdrop-blur-md">
-            <MBDigitalLogo className="h-4.5 w-4.5 animate-pulse" showGlow={false} />
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full border border-gray-850 bg-gray-950/60 backdrop-blur-md">
+            <MBDigitalLogo className="h-4.5 w-4.5 animate-pulse" showGlow={false} neonColorHex={colorStuff.accentHex} customLogoUrl={config.logoUrl} />
             <span className="text-xs font-mono font-semibold tracking-widest text-gray-400 uppercase">
               Tecnología de Vanguardia
             </span>
@@ -86,10 +92,13 @@ export default function Hero({ config }: HeroProps) {
               if (idx >= config.tagline.split(' ').length - 2) {
                 return (
                   <span key={idx} className="relative inline-block ml-3">
-                    <span className={`relative z-10 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent`}>
+                    <span className="relative z-10 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
                       {word}
                     </span>
-                    <span className={`absolute -bottom-1 left-0 w-full h-[3px] bg-gradient-to-r from-${config.neonColor}-500 to-transparent blur-[1px] opacity-80`} />
+                    <span 
+                      className="absolute -bottom-1 left-0 w-full h-[3px] blur-[1px] opacity-80" 
+                      style={{ background: `linear-gradient(to right, ${colorStuff.accentHex}, transparent)` }}
+                    />
                   </span>
                 );
               }

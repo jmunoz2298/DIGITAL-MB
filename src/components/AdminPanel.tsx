@@ -3,7 +3,8 @@ import { motion } from 'motion/react';
 import { 
   X, Save, RotateCcw, Plus, Trash2, Sliders, ShoppingBag, 
   Briefcase, FileText, BarChart3, MessageSquare, Upload, 
-  Lock, KeyRound, Pencil, Check, Eye, Trash, Terminal, AlertTriangle, ShieldCheck
+  Lock, KeyRound, Pencil, Check, Eye, Trash, Terminal, AlertTriangle, ShieldCheck,
+  ArrowUp, ArrowDown
 } from 'lucide-react';
 import { StoreConfig, Product, Service, Message, AdminAuth } from '../types';
 import { getNeonColorClasses } from '../utils';
@@ -58,6 +59,28 @@ export default function AdminPanel({
   const [instagramUrl, setInstagramUrl] = useState(config.instagramUrl || '');
   const [linkedinUrl, setLinkedinUrl] = useState(config.linkedinUrl || '');
   const [tiktokUrl, setTiktokUrl] = useState(config.tiktokUrl || '');
+
+  // Customizable branding settings state
+  const [logoUrl, setLogoUrl] = useState(config.logoUrl || '');
+  const [heroLogoUrl, setHeroLogoUrl] = useState(config.heroLogoUrl || '');
+  const [faviconUrl, setFaviconUrl] = useState(config.faviconUrl || '');
+  const [resellerIconUrl, setResellerIconUrl] = useState(config.resellerIconUrl || '');
+
+  // Customizable categories state
+  const [categoriesList, setCategoriesList] = useState<string[]>(
+    config.categories && config.categories.length > 0 
+      ? config.categories 
+      : ['Streaming', 'Herramientas digitales', 'Inteligencia artificial', 'Redes sociales', 'IPTV']
+  );
+  const [newCategoryInput, setNewCategoryInput] = useState('');
+  const [editingCategoryIndex, setEditingCategoryIndex] = useState<number | null>(null);
+  const [editingCategoryValue, setEditingCategoryValue] = useState('');
+
+  // Customizable reseller announcements
+  const [resellerBannerText, setResellerBannerText] = useState(
+    config.resellerBannerText || "¿Quieres emprender y comenzar a vender cuentas premium? 💚 Comunícate con nosotros al WhatsApp y te daremos precios accesibles para revender nuestros productos."
+  );
+  const [showResellerBanner, setShowResellerBanner] = useState(config.showResellerBanner !== false);
   
   // Admin password updates form
   const [editUser, setEditUser] = useState('777chuchooo@gmail.com');
@@ -71,9 +94,14 @@ export default function AdminPanel({
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
   const [newProductDesc, setNewProductDesc] = useState('');
-  const [newProductCat, setNewProductCat] = useState('Herramientas');
+  // Set default category to first active element in list or fallback
+  const [newProductCat, setNewProductCat] = useState(
+    config.categories && config.categories.length > 0 ? config.categories[0] : 'Streaming'
+  );
   const [newProductImg, setNewProductImg] = useState('');
   const [newProductWA, setNewProductWA] = useState('');
+  const [newProductStock, setNewProductStock] = useState<number | ''>(50);
+  const [newProductInStock, setNewProductInStock] = useState(true);
 
   // Services manager states (temp listings)
   const [tempServices, setTempServices] = useState<Service[]>([...services]);
@@ -307,7 +335,14 @@ export default function AdminPanel({
       aboutText,
       instagramUrl,
       linkedinUrl,
-      tiktokUrl
+      tiktokUrl,
+      categories: categoriesList,
+      resellerBannerText,
+      showResellerBanner,
+      logoUrl,
+      heroLogoUrl,
+      faviconUrl,
+      resellerIconUrl
     };
 
     // 1. Commit store general settings to Firestore
@@ -346,10 +381,12 @@ export default function AdminPanel({
       name: newProductName.trim(),
       price: newProductPrice.trim() || '$19.99 USD',
       description: newProductDesc.trim() || 'Descripción detallada del nuevo recurso digital futurista.',
-      category: newProductCat || 'Herramientas',
+      category: newProductCat || 'Streaming',
       imageUrl: newProductImg,
       whatsappMessage: newProductWA.trim() || '',
-      views: 0
+      views: 0,
+      stock: newProductStock === '' ? undefined : Number(newProductStock),
+      inStock: newProductInStock
     };
 
     // 1. Write to Firestore Collection (conforming real persistence rule)
@@ -370,6 +407,8 @@ export default function AdminPanel({
     setNewProductDesc('');
     setNewProductImg('');
     setNewProductWA('');
+    setNewProductStock(50);
+    setNewProductInStock(true);
   };
 
   // UPDATE: Existing product edit
@@ -585,8 +624,8 @@ export default function AdminPanel({
           <div className="grid grid-cols-4 border-b border-gray-900 bg-gray-950/20 text-[10px] font-mono font-black tracking-widest uppercase">
             <button
               onClick={() => setActiveTab('dashboard')}
-              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-colors ${
-                activeTab === 'dashboard' ? `border-${config.neonColor}-500 text-white bg-white/5` : 'border-transparent text-gray-500 hover:text-gray-300'
+              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-all ${
+                activeTab === 'dashboard' ? colorStuff.tabActive : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
             >
               <BarChart3 className="h-3.5 w-3.5" />
@@ -594,8 +633,8 @@ export default function AdminPanel({
             </button>
             <button
               onClick={() => setActiveTab('general')}
-              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-colors ${
-                activeTab === 'general' ? `border-${config.neonColor}-500 text-white bg-white/5` : 'border-transparent text-gray-500 hover:text-gray-300'
+              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-all ${
+                activeTab === 'general' ? colorStuff.tabActive : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
             >
               <FileText className="h-3.5 w-3.5" />
@@ -603,8 +642,8 @@ export default function AdminPanel({
             </button>
             <button
               onClick={() => setActiveTab('products')}
-              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-colors ${
-                activeTab === 'products' ? `border-${config.neonColor}-500 text-white bg-white/5` : 'border-transparent text-gray-500 hover:text-gray-300'
+              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-all ${
+                activeTab === 'products' ? colorStuff.tabActive : 'border-transparent text-gray-500 hover:text-gray-350'
               }`}
             >
               <ShoppingBag className="h-3.5 w-3.5" />
@@ -612,8 +651,8 @@ export default function AdminPanel({
             </button>
             <button
               onClick={() => setActiveTab('services')}
-              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-colors ${
-                activeTab === 'services' ? `border-${config.neonColor}-500 text-white bg-white/5` : 'border-transparent text-gray-500 hover:text-gray-300'
+              className={`py-4 flex flex-col sm:flex-row items-center justify-center gap-1.5 border-b-2 cursor-pointer transition-all ${
+                activeTab === 'services' ? colorStuff.tabActive : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
             >
               <Briefcase className="h-3.5 w-3.5" />
@@ -768,8 +807,9 @@ export default function AdminPanel({
                   <div>
                     <label className="block text-xs font-mono font-semibold text-gray-400 mb-2">Color de Acento Neón de la Empresa</label>
                     <div className="flex items-center space-x-3.5">
-                      {(['cyan', 'blue', 'purple', 'emerald', 'indigo'] as const).map((col) => {
+                      {(['white', 'cyan', 'blue', 'purple', 'emerald', 'indigo'] as const).map((col) => {
                         const colHex = {
+                          white: 'bg-white shadow-white/20',
                           cyan: 'bg-cyan-500 shadow-cyan-500/20',
                           blue: 'bg-blue-500 shadow-blue-500/20',
                           purple: 'bg-purple-500 shadow-purple-500/20',
@@ -823,6 +863,359 @@ export default function AdminPanel({
                       onChange={(e) => setTiktokUrl(e.target.value)}
                       className="w-full px-4 py-2.5 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs transition-colors"
                     />
+                  </div>
+                </div>
+
+                {/* SECCIÓN DE BRANDING Y LOGOS */}
+                <h3 className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest pt-4">Identidad Visual & Branding</h3>
+                <div className="p-4 rounded-2xl border border-gray-900 bg-gray-950/45 space-y-5">
+                  <p className="text-[11px] text-gray-400 pb-1 border-b border-gray-900">
+                    Sube u organiza la identidad visual de tu marca: logos corporativos, favicon y anuncios publicitarios sin modificar código de forma sencilla.
+                  </p>
+
+                  {/* 1. Logo Principal (Header/Footer) */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-mono font-semibold text-gray-300">Logo Principal de la Web (Header & Footer)</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        type="text"
+                        placeholder="Ingresa URL del logo o sube uno nuevo..."
+                        value={logoUrl}
+                        onChange={(e) => setLogoUrl(e.target.value)}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs transition-colors"
+                      />
+                      <label className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-xs font-mono font-semibold cursor-pointer text-center flex items-center justify-center border border-gray-800 transition-colors">
+                        Subir Imagen
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              try {
+                                const base64 = await compressImageToBase64(e.target.files[0], 250, 250);
+                                setLogoUrl(base64);
+                              } catch (err) {
+                                alert("Error al subir el logo");
+                              }
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {logoUrl && (
+                      <div className="flex items-center space-x-3 p-2 bg-gray-950 rounded-xl border border-gray-900 w-fit">
+                        <img src={logoUrl} alt="Preview Logo" className="h-10 w-10 object-contain rounded" referrerPolicy="no-referrer" />
+                        <button type="button" onClick={() => setLogoUrl('')} className="text-[10px] uppercase font-mono text-red-500 hover:text-red-400 font-bold transition-colors">Remover</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 2. Logo Grande (Hero Page) */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-mono font-semibold text-gray-300">Logo Gigante de Presentación (Sección Hero)</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        type="text"
+                        placeholder="Ingresa URL o sube una imagen destacada..."
+                        value={heroLogoUrl}
+                        onChange={(e) => setHeroLogoUrl(e.target.value)}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs transition-colors"
+                      />
+                      <label className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-xs font-mono font-semibold cursor-pointer text-center flex items-center justify-center border border-gray-800 transition-colors">
+                        Subir Imagen
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              try {
+                                const base64 = await compressImageToBase64(e.target.files[0], 350, 350);
+                                setHeroLogoUrl(base64);
+                              } catch (err) {
+                                alert("Error al subir la imagen");
+                              }
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {heroLogoUrl && (
+                      <div className="flex items-center space-x-3 p-2 bg-gray-950 rounded-xl border border-gray-900 w-fit">
+                        <img src={heroLogoUrl} alt="Preview Hero Logo" className="h-14 w-14 object-contain rounded" referrerPolicy="no-referrer" />
+                        <button type="button" onClick={() => setHeroLogoUrl('')} className="text-[10px] uppercase font-mono text-red-500 hover:text-red-400 font-bold transition-colors">Remover</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 3. Favicon (Pestaña Navegador) */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-mono font-semibold text-gray-300">Favicon Corporativo (Icono superior de pestaña)</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        type="text"
+                        placeholder="Ingresa URL de icono .ico / .png o sube..."
+                        value={faviconUrl}
+                        onChange={(e) => setFaviconUrl(e.target.value)}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs transition-colors"
+                      />
+                      <label className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-xs font-mono font-semibold cursor-pointer text-center flex items-center justify-center border border-gray-800 transition-colors">
+                        Subir Imagen
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              try {
+                                const base64 = await compressImageToBase64(e.target.files[0], 64, 64);
+                                setFaviconUrl(base64);
+                              } catch (err) {
+                                alert("Error al subir el favicon");
+                              }
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {faviconUrl && (
+                      <div className="flex items-center space-x-3 p-2 bg-gray-950 rounded-xl border border-gray-900 w-fit">
+                        <img src={faviconUrl} alt="Preview Favicon" className="h-8 w-8 object-contain rounded" referrerPolicy="no-referrer" />
+                        <button type="button" onClick={() => setFaviconUrl('')} className="text-[10px] uppercase font-mono text-red-500 hover:text-red-400 font-bold transition-colors">Remover</button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 4. Reseller Banner Icon (Anuncio revendedores) */}
+                  <div className="space-y-2">
+                    <label className="block text-xs font-mono font-semibold text-gray-300 font-bold">Icono/Logo de Anuncio de Revendedores</label>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <input
+                        type="text"
+                        placeholder="Ingresa URL o sube para reemplazar la estrella verde..."
+                        value={resellerIconUrl}
+                        onChange={(e) => setResellerIconUrl(e.target.value)}
+                        className="flex-1 px-4 py-2.5 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs transition-colors"
+                      />
+                      <label className="px-4 py-2.5 bg-gray-900 hover:bg-gray-800 text-white rounded-xl text-xs font-mono font-semibold cursor-pointer text-center flex items-center justify-center border border-gray-800 transition-colors">
+                        Subir Imagen
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={async (e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              try {
+                                const base64 = await compressImageToBase64(e.target.files[0], 120, 120);
+                                setResellerIconUrl(base64);
+                              } catch (err) {
+                                alert("Error al subir el icono de revendedores");
+                              }
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+                    {resellerIconUrl && (
+                      <div className="flex items-center space-x-3 p-2 bg-gray-950 rounded-xl border border-gray-900 w-fit">
+                        <img src={resellerIconUrl} alt="Preview Reseller" className="h-10 w-10 object-contain rounded bg-emerald-500/10 border border-emerald-500/20 p-1" referrerPolicy="no-referrer" />
+                        <button type="button" onClick={() => setResellerIconUrl('')} className="text-[10px] uppercase font-mono text-red-500 hover:text-red-400 font-bold transition-colors">Remover</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* CATEGÓRICAS MANAGER SECTION */}
+                <h3 className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest pt-4">Categorías Personalizadas</h3>
+                <div className="p-4 rounded-2xl border border-gray-900 bg-gray-950/45 space-y-4">
+                  <p className="text-[11px] text-gray-400">
+                    Crea, renombra o elimina categorías de tu catálogo. Al renombrar una categoría, todos los productos asignados a ella se actualizarán automáticamente.
+                  </p>
+
+                  {/* Add New Category Node Inline */}
+                  <div className="flex gap-2.5">
+                    <input
+                      type="text"
+                      value={newCategoryInput}
+                      onChange={(e) => setNewCategoryInput(e.target.value)}
+                      placeholder="Nueva categoría (Suscripciones, IPTV, etc)"
+                      className="flex-1 px-3 py-2 rounded-xl bg-gray-950 border border-gray-800 text-white focus:border-cyan-500 outline-none text-xs"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const val = newCategoryInput.trim();
+                        if (val && !categoriesList.includes(val)) {
+                          setCategoriesList([...categoriesList, val]);
+                          setNewCategoryInput('');
+                        }
+                      }}
+                      className="px-4 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-black font-display font-black text-[10px] uppercase tracking-wider transition-all"
+                    >
+                      Agregar
+                    </button>
+                  </div>
+
+                  {/* Quick Categories List Grid with Action Nodes */}
+                  <div className="space-y-2 max-h-[180px] overflow-y-auto pr-1">
+                    {categoriesList.map((cat, idx) => {
+                      const isEditingThis = editingCategoryIndex === idx;
+
+                      return (
+                        <div key={idx} className="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-gray-900 text-xs">
+                          {isEditingThis ? (
+                            <div className="flex-1 flex gap-2">
+                              <input
+                                type="text"
+                                value={editingCategoryValue}
+                                onChange={(e) => setEditingCategoryValue(e.target.value)}
+                                className="flex-1 px-2 py-1 rounded bg-gray-950 border border-gray-800 text-white text-xs outline-none focus:border-cyan-500"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (editingCategoryValue.trim() && editingCategoryValue.trim() !== cat) {
+                                    const oldCat = cat;
+                                    const newCat = editingCategoryValue.trim();
+                                    
+                                    // 1. Rename in local list state
+                                    const newList = [...categoriesList];
+                                    newList[idx] = newCat;
+                                    setCategoriesList(newList);
+
+                                    // 2. Cascade rename across products catalog list to keep data integrated!
+                                    const renamedProducts = tempProducts.map(p => {
+                                      if (p.category === oldCat) {
+                                        return { ...p, category: newCat };
+                                      }
+                                      return p;
+                                    });
+                                    setTempProducts(renamedProducts);
+
+                                    // Reset editing state
+                                    setEditingCategoryIndex(null);
+                                    setEditingCategoryValue('');
+                                  } else {
+                                    setEditingCategoryIndex(null);
+                                  }
+                                }}
+                                className="px-2 py-1 rounded bg-emerald-500 text-black font-bold font-mono text-[9px]"
+                              >
+                                OK
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingCategoryIndex(null)}
+                                className="px-2 py-1 rounded bg-gray-800 text-gray-400 text-[9px]"
+                              >
+                                CANCELAR
+                              </button>
+                            </div>
+                          ) : (
+                            <>
+                              <span className="font-mono text-gray-300 font-semibold">{cat}</span>
+                              <div className="flex items-center space-x-1.5">
+                                <button
+                                  type="button"
+                                  disabled={idx === 0}
+                                  onClick={() => {
+                                    if (idx > 0) {
+                                      const newList = [...categoriesList];
+                                      const temp = newList[idx];
+                                      newList[idx] = newList[idx - 1];
+                                      newList[idx - 1] = temp;
+                                      setCategoriesList(newList);
+                                    }
+                                  }}
+                                  className={`p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors ${
+                                    idx === 0 ? 'opacity-30 cursor-not-allowed bg-transparent' : 'bg-gray-900 hover:bg-gray-800'
+                                  }`}
+                                  title="Subir"
+                                >
+                                  <ArrowUp className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={idx === categoriesList.length - 1}
+                                  onClick={() => {
+                                    if (idx < categoriesList.length - 1) {
+                                      const newList = [...categoriesList];
+                                      const temp = newList[idx];
+                                      newList[idx] = newList[idx + 1];
+                                      newList[idx + 1] = temp;
+                                      setCategoriesList(newList);
+                                    }
+                                  }}
+                                  className={`p-1.5 rounded-lg text-gray-400 hover:text-white transition-colors ${
+                                    idx === categoriesList.length - 1 ? 'opacity-30 cursor-not-allowed bg-transparent' : 'bg-gray-900 hover:bg-gray-800'
+                                  }`}
+                                  title="Bajar"
+                                >
+                                  <ArrowDown className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingCategoryIndex(idx);
+                                    setEditingCategoryValue(cat);
+                                  }}
+                                  className="p-1.5 rounded-lg bg-gray-900 hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+                                  title="Renombrar categoría"
+                                >
+                                  <Pencil className="h-3.5 w-3.5" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (window.confirm(`¿Estás seguro de eliminar la categoría "${cat}"? Los productos asignados seguirán existiendo, pero se quedarán sin categoría asociada.`)) {
+                                      setCategoriesList(categoriesList.filter((_, i) => i !== idx));
+                                    }
+                                  }}
+                                  className="p-1.5 rounded-lg bg-red-950/20 hover:bg-red-900/30 text-red-400 hover:text-red-300 transition-colors"
+                                  title="Eliminar categoría"
+                                >
+                                  <Trash className="h-3.5 w-3.5" stroke="currentColor" />
+                                </button>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* ANUNCIO PARA REVENDEDORES CONFIG SECTION */}
+                <h3 className="font-mono text-xs font-bold text-gray-500 uppercase tracking-widest pt-4">Anuncio para Revendedores</h3>
+                <div className="p-4 rounded-2xl border border-gray-900 bg-gray-950/40 space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-gray-900/40">
+                    <label className="text-xs font-mono font-semibold text-gray-300">Mostrar Anuncio de Revendedor</label>
+                    <button
+                      type="button"
+                      onClick={() => setShowResellerBanner(!showResellerBanner)}
+                      className={`px-3 py-1 rounded-xl text-[10px] font-mono tracking-widest font-extrabold uppercase transition-all flex items-center space-x-1 ${
+                        showResellerBanner 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-sm' 
+                          : 'bg-gray-950 text-gray-500 border border-gray-900'
+                      }`}
+                    >
+                      <span>{showResellerBanner ? 'Activado' : 'Desactivado'}</span>
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-mono font-semibold text-gray-400 mb-1.5">Texto del Anuncio</label>
+                    <textarea
+                      rows={3}
+                      value={resellerBannerText}
+                      onChange={(e) => setResellerBannerText(e.target.value)}
+                      placeholder="Escribe el mensaje llamativo para captar revendedores..."
+                      className="w-full px-4 py-2.5 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs leading-relaxed resize-none"
+                    />
+                    <p className="text-[10px] text-gray-500 mt-1">
+                      El texto soporta emojis clásicos. Los interesados serán redirigidos a chatear por WhatsApp con una plantilla prediseñada para solicitar precios de revendedor.
+                    </p>
                   </div>
                 </div>
 
@@ -906,9 +1299,9 @@ export default function AdminPanel({
                           onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value })}
                           className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs"
                         >
-                          <option value="Herramientas">Herramientas</option>
-                          <option value="Suscripciones">Suscripciones</option>
-                          <option value="Productos Digitales">Productos Digitales</option>
+                          {categoriesList.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
                         </select>
                       </div>
                       <div>
@@ -920,6 +1313,31 @@ export default function AdminPanel({
                           placeholder="Hola, quiero adquirir la herramienta..."
                           className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs"
                         />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-mono font-bold text-gray-400 mb-1">Cantidad en Stock (0 para Agotado)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={editingProduct.stock !== undefined && editingProduct.stock !== null ? editingProduct.stock : ''}
+                          onChange={(e) => setEditingProduct({ ...editingProduct, stock: e.target.value === '' ? undefined : Number(e.target.value) })}
+                          placeholder="Sin límite artificial"
+                          className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs font-mono font-semibold"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono font-bold text-gray-400 mb-1">Estado de Disponibilidad</label>
+                        <select
+                          value={editingProduct.inStock !== false ? 'true' : 'false'}
+                          onChange={(e) => setEditingProduct({ ...editingProduct, inStock: e.target.value === 'true' })}
+                          className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs"
+                        >
+                          <option value="true">🟢 DISPONIBLE / ACTIVO</option>
+                          <option value="false">🔴 AGOTADO / INACTIVO</option>
+                        </select>
                       </div>
                     </div>
 
@@ -945,7 +1363,7 @@ export default function AdminPanel({
                         onClick={() => fileInputRef.current?.click()}
                         className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
                           dragActive 
-                            ? `border-${config.neonColor}-500 bg-${config.neonColor}-500/5` 
+                            ? colorStuff.cardActive 
                             : 'border-gray-900 bg-gray-950/20 hover:border-gray-800'
                         }`}
                       >
@@ -1052,9 +1470,9 @@ export default function AdminPanel({
                           onChange={(e) => setNewProductCat(e.target.value)}
                           className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs"
                         >
-                          <option value="Herramientas">Herramientas</option>
-                          <option value="Suscripciones">Suscripciones</option>
-                          <option value="Productos Digitales">Productos Digitales</option>
+                          {categoriesList.map(cat => (
+                            <option key={cat} value={cat}>{cat}</option>
+                          ))}
                         </select>
                       </div>
                       <div>
@@ -1066,6 +1484,31 @@ export default function AdminPanel({
                           placeholder="Mensaje de compra personalizada"
                           className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs placeholder-gray-700"
                         />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3.5">
+                      <div>
+                        <label className="block text-[10px] font-mono font-bold text-gray-400 mb-1">Cantidad Inicial en Stock</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={newProductStock}
+                          onChange={(e) => setNewProductStock(e.target.value === '' ? '' : Number(e.target.value))}
+                          placeholder="Ej: 50"
+                          className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono font-bold text-gray-400 mb-1">Estado de Disponibilidad</label>
+                        <select
+                          value={newProductInStock ? 'true' : 'false'}
+                          onChange={(e) => setNewProductInStock(e.target.value === 'true')}
+                          className="w-full px-3 py-2 rounded-xl bg-gray-950 border border-gray-900 text-white focus:border-cyan-500 outline-none text-xs"
+                        >
+                          <option value="true">🟢 DISPONIBLE / ACTIVO</option>
+                          <option value="false">🔴 AGOTADO / INACTIVO</option>
+                        </select>
                       </div>
                     </div>
 
@@ -1092,7 +1535,7 @@ export default function AdminPanel({
                         onClick={() => fileInputRef.current?.click()}
                         className={`border-2 border-dashed rounded-2xl p-4.5 text-center cursor-pointer transition-all ${
                           dragActive 
-                            ? `border-${config.neonColor}-500 bg-${config.neonColor}-500/5` 
+                            ? colorStuff.cardActive 
                             : 'border-gray-900 bg-gray-950/20 hover:border-gray-800'
                         }`}
                       >

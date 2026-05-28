@@ -4,61 +4,76 @@ export const DEFAULT_CONFIG: StoreConfig = {
   storeName: "Tienda MB DIGITAL",
   tagline: "Potencia tu mundo digital",
   whatsappNumber: "3143497151",
-  neonColor: "cyan",
+  neonColor: "white",
   instagramUrl: "https://instagram.com",
   linkedinUrl: "https://linkedin.com",
   tiktokUrl: "https://tiktok.com",
-  aboutText: "Soluciones digitales revolucionarias, automatizaciones impulsadas por Inteligencia Artificial, edición de video cinematográfica y diseño de alta fidelidad para impulsar marcas que lideran el mañana."
+  aboutText: "Soluciones digitales revolucionarias, automatizaciones impulsadas por Inteligencia Artificial, edición de video cinematográfica y diseño de alta fidelidad para impulsar marcas que lideran el mañana.",
+  categories: ['Streaming', 'IPTV', 'Herramientas', 'Inteligencia Artificial', 'Redes Sociales'],
+  resellerBannerText: "¿Quieres emprender y comenzar a vender cuentas premium? 💚 Comunícate con nosotros al WhatsApp y te daremos precios accesibles para revender nuestros productos.",
+  showResellerBanner: true
 };
 
 export const DEFAULT_PRODUCTS: Product[] = [
   {
+    id: "prod-8",
+    name: "Netflix Premium Ultra HD",
+    price: "$8.50 USD",
+    description: "Acceso garantizado de 30 días a tu pantalla privada en calidad 4K Ultra HD. Soporte y reemplazo inmediato por WhatsApp sin esperas.",
+    category: "Streaming",
+    imageUrl: "",
+    stock: 75,
+    inStock: true
+  },
+  {
+    id: "prod-7",
+    name: "IPTV Gold Premium Ultimate",
+    price: "$45.00 / año",
+    description: "Más de 12,000 canales nacionales e internacionales, deportes premium en vivo, ligas mundiales y catálogo inmenso de películas/series en 4K.",
+    category: "IPTV",
+    imageUrl: "",
+    stock: 40,
+    inStock: true
+  },
+  {
     id: "prod-1",
     name: "Licencia Premium Tool Vault",
     price: "$14.99 USD",
-    description: "Acceso exclusivo de 30 días a nuestro suite seleccionado de herramientas premium de IA, analítica y optimización de contenido.",
+    description: "Acceso exclusivo de 30 días a nuestra suite seleccionada de utilidades premium de analítica y optimización de contenido digital de vanguardia.",
     category: "Herramientas",
-    imageUrl: "" // Will fall back to customized futuristic gradient
-  },
-  {
-    id: "prod-2",
-    name: "Pack Editor Cinematográfico",
-    price: "$29.99 USD",
-    description: "Colección exclusiva con más de 200 transiciones futuristas, efectos de sonido (SFX) cinemáticos y overlays listos para Premiere y After Effects.",
-    category: "Productos Digitales",
-    imageUrl: ""
+    imageUrl: "",
+    stock: 50,
+    inStock: true
   },
   {
     id: "prod-3",
     name: "Suscripción Automatizadora IA",
     price: "$49.99 / mes",
-    description: "Soporte e implementación de bots de respuesta inteligente, flujos automatizados de email y scraping de datos web constante.",
-    category: "Suscripciones",
-    imageUrl: ""
+    description: "Soporte e implementación premium de bots conversacionales inteligentes con memoria, flujos rápidos de email y automatizaciones completas.",
+    category: "Inteligencia Artificial",
+    imageUrl: "",
+    stock: 20,
+    inStock: true
   },
   {
     id: "prod-4",
     name: "Master Prompts Database DB",
     price: "$9.99 USD",
-    description: "La biblia definitiva del Prompt Engineering. Más de 600 prompts refinados para ChatGPT, Midjourney y Claude que multiplican tu productividad por 10.",
-    category: "Productos Digitales",
-    imageUrl: ""
+    description: "La guía definitiva de Prompt Engineering. Más de 600 prompts de alta conversión para ChatGPT, Claude y Midjourney listos para multiplicar tu productividad.",
+    category: "Inteligencia Artificial",
+    imageUrl: "",
+    stock: 120,
+    inStock: true
   },
   {
-    id: "prod-5",
-    name: "Licencia Anual Elementos VFX",
-    price: "$59.00 USD",
-    description: "Plataforma ilimitada de recursos visuales premium, overlays 4K, modelados 3D abstractos y animaciones fluidas para tus producciones.",
-    category: "Herramientas",
-    imageUrl: ""
-  },
-  {
-    id: "prod-6",
-    name: "Landing Page Startup Pro",
-    price: "$199.00 USD",
-    description: "Estructura web de una sola página ultra optimizada, adaptada a tu negocio con diseño minimalista, neones futuristas y cargada en menos de 1 segundo.",
-    category: "Suscripciones",
-    imageUrl: ""
+    id: "prod-2",
+    name: "Pack Editor Cinematográfico",
+    price: "$29.99 USD",
+    description: "Colección exclusiva con más de 200 transiciones de neón, efectos cinematográficos (SFX) y overlays futuristas listos para Premiere y CapCut.",
+    category: "Redes Sociales",
+    imageUrl: "",
+    stock: 95,
+    inStock: true
   }
 ];
 

@@ -24,8 +24,8 @@ export default function Footer({ config }: FooterProps) {
           
           {/* Brand Col */}
           <div className="md:col-span-5 flex flex-col space-y-6">
-            <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <MBDigitalLogo className="h-10 w-10" showGlow={true} />
+            <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+              <MBDigitalLogo className="h-10 w-10 group-hover:scale-105 transition-transform duration-300" showGlow={true} neonColorHex={colorStuff.accentHex} customLogoUrl={config.logoUrl} />
               <span className="font-display font-extrabold text-xl tracking-wider text-white">
                 {config.storeName}
               </span>

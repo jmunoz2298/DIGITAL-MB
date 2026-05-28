@@ -10,6 +10,7 @@ import WhatsAppButton from './components/WhatsAppButton';
 import ContactForm from './components/ContactForm';
 import Footer from './components/Footer';
 import AdminPanel from './components/AdminPanel';
+import ResellerBanner from './components/ResellerBanner';
 import { db } from './firebase';
 import { doc, setDoc, onSnapshot, collection, updateDoc } from 'firebase/firestore';
 
@@ -126,6 +127,17 @@ export default function App() {
     };
   }, []);
 
+  // Update website favicon dynamically based on custom asset configurations
+  useEffect(() => {
+    if (config.faviconUrl) {
+      const link = (document.querySelector("link[rel~='icon']") as HTMLLinkElement) || document.createElement('link');
+      link.type = 'image/x-icon';
+      link.rel = 'shortcut icon';
+      link.href = config.faviconUrl;
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+  }, [config.faviconUrl]);
+
   // Track product views clicks on WhatsApp Comprar button (Firestore Increment)
   const trackProductView = async (productId: string) => {
     try {
@@ -194,11 +206,11 @@ export default function App() {
   };
 
   return (
-    <div id="main-site-wrapper" className="min-h-screen bg-[#050506] relative overflow-hidden text-gray-100 font-sans selection:bg-cyan-500/30 selection:text-white">
+    <div id="main-site-wrapper" className="min-h-screen bg-[#050506] relative overflow-hidden text-gray-100 font-sans selection:bg-white/20 selection:text-white">
       {/* Dynamic Glow Overlay following chosen theme color based on Immersive UI theme specs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-cyan-900/20 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-900/20 blur-[120px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-neutral-900/20 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-neutral-900/10 blur-[120px] rounded-full" />
         {/* Dynamic theme accent helper */}
         <div 
           className="absolute top-[20%] right-[10%] w-[40%] h-[40%] blur-[130px] rounded-full opacity-20"
@@ -207,6 +219,7 @@ export default function App() {
                         config.neonColor === 'blue' ? 'rgba(59,130,246,0.15)' :
                         config.neonColor === 'purple' ? 'rgba(168,85,247,0.15)' :
                         config.neonColor === 'emerald' ? 'rgba(16,185,129,0.15)' :
+                        config.neonColor === 'white' ? 'rgba(255,255,255,0.08)' :
                         'rgba(99,102,241,0.15)'
           }}
         />
@@ -220,6 +233,9 @@ export default function App() {
 
       {/* Hero Presentation */}
       <Hero config={config} />
+
+      {/* Modern High-Impact Reseller Banner */}
+      <ResellerBanner config={config} />
 
       {/* Digital Products Catalog with View Track trigger */}
       <Catalog 

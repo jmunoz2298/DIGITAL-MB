@@ -37,11 +37,11 @@ export default function Navbar({ config, onOpenAdmin }: NavbarProps) {
   );
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 h-20 border-b border-gray-900 interactive-glass transition-all duration-300">
+    <nav className="fixed top-0 left-0 w-full z-50 h-20 border-b border-white/5 bg-black/60 backdrop-blur-xl transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
         {/* Brand Logo */}
-        <div className="flex items-center space-x-3 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <MBDigitalLogo className="h-10 w-10 sm:h-11 sm:w-11" showGlow={true} />
+        <div className="flex items-center space-x-3 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <MBDigitalLogo className="h-10 w-10 sm:h-11 sm:w-11 group-hover:scale-105 transition-transform duration-300" showGlow={true} neonColorHex={colorStuff.accentHex} customLogoUrl={config.logoUrl} />
           <span className="font-display font-extrabold text-lg sm:text-xl tracking-wider text-white">
             {config.storeName}
           </span>

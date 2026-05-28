@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { ShoppingCart, ExternalLink, Tag, ShieldCheck, Cpu, Star, Download, Sparkles } from 'lucide-react';
+import { ShoppingCart, ExternalLink, Tag, ShieldCheck, Cpu, Star, Download, Sparkles, X } from 'lucide-react';
 import { Product, StoreConfig } from '../types';
 import { getNeonColorClasses, generateWhatsAppUrl } from '../utils';
 
@@ -11,15 +11,19 @@ interface CatalogProps {
 }
 
 export default function Catalog({ products, config, onTrackView }: CatalogProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('Todos');
+  // Get dynamic categories from config or fallback to products unique categories
+  const categories = config.categories && config.categories.length > 0
+    ? config.categories
+    : [...new Set(products.map(p => p.category))];
+
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const colorStuff = getNeonColorClasses(config.neonColor);
 
-  // Get unique categories
-  const categories = ['Todos', ...new Set(products.map(p => p.category))];
+  const activeCategory = selectedCategory && categories.includes(selectedCategory)
+    ? selectedCategory
+    : (categories[0] || '');
 
-  const filteredProducts = selectedCategory === 'Todos'
-    ? products
-    : products.filter(p => p.category === selectedCategory);
+  const filteredProducts = products.filter(p => p.category === activeCategory);
 
   // Helper to render responsive visual icons based on category
   const renderProductIcon = (category: string) => {
@@ -71,7 +75,7 @@ export default function Catalog({ products, config, onTrackView }: CatalogProps)
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`px-5 py-2.5 rounded-xl font-display font-bold text-xs tracking-wider uppercase transition-all duration-300 pointer cursor-pointer ${
-                  selectedCategory === category
+                  activeCategory === category
                     ? `${colorStuff.buttonBg} ${colorStuff.glow}`
                     : 'bg-gray-950/50 hover:bg-gray-900 border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white'
                 }`}
@@ -129,11 +133,32 @@ export default function Catalog({ products, config, onTrackView }: CatalogProps)
                     <span>{product.category}</span>
                   </span>
 
-                  {/* Guaranteed Badge */}
-                  <span className="absolute top-4 right-4 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold bg-green-500/10 text-green-400 border border-green-500/20 backdrop-blur-sm">
-                    <ShieldCheck className="h-3 w-3" />
-                    <span>ACTIVO 24/7</span>
-                  </span>
+                  {/* Dynamic Stock / Availability Badge */}
+                  {(() => {
+                    const isOutOfStock = product.inStock === false || (product.stock !== undefined && product.stock !== null && product.stock <= 0);
+                    if (isOutOfStock) {
+                      return (
+                        <span className="absolute top-4 right-4 inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold bg-red-500/10 text-red-400 border border-red-500/30 backdrop-blur-sm shadow-[0_0_12px_rgba(239,68,68,0.15)]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+                          <span>AGOTADO</span>
+                        </span>
+                      );
+                    } else if (product.stock !== undefined && product.stock !== null) {
+                      return (
+                        <span className="absolute top-4 right-4 inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold bg-green-500/10 text-green-400 border border-green-500/20 backdrop-blur-sm">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                          <span>{product.stock} DISPONIBLES</span>
+                        </span>
+                      );
+                    } else {
+                      return (
+                        <span className="absolute top-4 right-4 inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-[9px] font-mono font-bold bg-green-500/10 text-green-400 border border-green-500/20 backdrop-blur-sm">
+                          <ShieldCheck className="h-3 w-3" />
+                          <span>DISPONIBLE</span>
+                        </span>
+                      );
+                    }
+                  })()}
                 </div>
 
                 {/* Content */}
@@ -148,6 +173,14 @@ export default function Catalog({ products, config, onTrackView }: CatalogProps)
                     {product.description}
                   </p>
 
+                  {/* Stock counter helper underneath description if configured */}
+                  {product.stock !== undefined && product.stock !== null && product.stock > 0 && (
+                    <div className="text-[10px] font-mono text-gray-500 flex items-center space-x-1.5">
+                      <span className="w-1 h-1 rounded-full bg-cyan-400" />
+                      <span>Unidades en stock: <strong className="text-gray-300 font-bold">{product.stock}</strong></span>
+                    </div>
+                  )}
+
                   <div className="pt-4 flex items-center justify-between border-t border-gray-900/85">
                     <div className="flex flex-col">
                       <span className="text-[10px] font-mono tracking-wider text-gray-500 uppercase">Inversión</span>
@@ -156,16 +189,33 @@ export default function Catalog({ products, config, onTrackView }: CatalogProps)
                       </span>
                     </div>
 
-                    <a
-                      href={buyUrl}
-                      target="_blank"
-                      referrerPolicy="no-referrer"
-                      onClick={() => onTrackView && onTrackView(product.id)}
-                      className={`flex items-center space-x-2 px-4.5 py-2.5 rounded-xl text-xs font-display font-black tracking-widest uppercase cursor-pointer ${colorStuff.buttonBg} transition-all duration-300`}
-                    >
-                      <span>Comprar</span>
-                      <ShoppingCart className="h-3.5 w-3.5" />
-                    </a>
+                    {(() => {
+                      const isOutOfStock = product.inStock === false || (product.stock !== undefined && product.stock !== null && product.stock <= 0);
+                      if (isOutOfStock) {
+                        return (
+                          <div
+                            className="flex items-center space-x-1.5 px-4.5 py-2.5 rounded-xl text-xs font-display font-black tracking-widest uppercase bg-gray-950 border border-red-500/20 text-red-400/60 cursor-not-allowed select-none"
+                            title="Producto temporalmente sin existencias"
+                          >
+                            <span>Agotado</span>
+                            <X className="h-3.5 w-3.5 text-red-500/40" />
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <a
+                          href={buyUrl}
+                          target="_blank"
+                          referrerPolicy="no-referrer"
+                          onClick={() => onTrackView && onTrackView(product.id)}
+                          className={`flex items-center space-x-2 px-4.5 py-2.5 rounded-xl text-xs font-display font-black tracking-widest uppercase cursor-pointer ${colorStuff.buttonBg} transition-all duration-300`}
+                        >
+                          <span>Comprar</span>
+                          <ShoppingCart className="h-3.5 w-3.5" />
+                        </a>
+                      );
+                    })()}
                   </div>
                 </div>
               </motion.div>
